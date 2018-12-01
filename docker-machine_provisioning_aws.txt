@@ -100,21 +100,21 @@ Provisioning on aws ec2 instances from docker-machine (my local oracl VM machine
 ========================================================================================================================================
 
 Centos -- > Image
-docker-machine create --driver amazonec2 --amazonec2-ami "ami-011b3ccf1bd6db744"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro"  --amazonec2-vpc-id vpc-e23fe498 --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,docker-machine" --amazonec2-ssh-user ec2-user ec22
+docker-machine create --driver amazonec2 --amazonec2-ami "ami-011b3ccf1bd6db744"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro" --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,docker-machine" --amazonec2-ssh-user ec2-user ec22
 
 
 Ubuntu --- < Image 
 ami-0ac019f4fcb7cb7e6
-docker-machine create --driver amazonec2 --amazonec2-ami "ami-0ac019f4fcb7cb7e6"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro"  --amazonec2-vpc-id vpc-e23fe498 --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,docker-machine" --amazonec2-ssh-user ubuntu instance-image1
+docker-machine create --driver amazonec2 --amazonec2-ami "ami-0ac019f4fcb7cb7e6"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro"  --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,docker-machine" --amazonec2-ssh-user ubuntu instance-image1
 
 
 -----------------------------------------------------------------------------------------------------------------------
    Provisioning the EC2 instances (Ubuntu image --> ami-0ac019f4fcb7cb7e6) from my local VM - Docker-machine 
 -----------------------------------------------------------------------------------------------------------------------
-$docker-machine create --driver amazonec2 --amazonec2-ami "ami-0ac019f4fcb7cb7e6"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro"  --amazonec2-vpc-id vpc-e23fe498 --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,provision-docker" --amazonec2-ssh-user ubuntu instance-image1
+$docker-machine create --driver amazonec2 --amazonec2-ami "ami-0ac019f4fcb7cb7e6"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro"  --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,provision-docker" --amazonec2-ssh-user ubuntu instance-image1
 
 
-[root@docker ~]#docker-machine create --driver amazonec2 --amazonec2-ami "ami-0ac019f4fcb7cb7e6"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro"  --amazonec2-vpc-id vpc-e23fe498 --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,docker-machine" --amazonec2-ssh-user ubuntu instance-image1
+[root@docker ~]#docker-machine create --driver amazonec2 --amazonec2-ami "ami-0ac019f4fcb7cb7e6"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro"  --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,docker-machine" --amazonec2-ssh-user ubuntu instance-image1
 Running pre-create checks...
 Creating machine...
 (instance-image1) Launching instance...
