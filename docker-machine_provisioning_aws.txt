@@ -1,0 +1,442 @@
+#########################################################################################################
+	-----------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------
+	------------------------     Docker-Machine Setup     -----------------------------------
+	------------------------             &		      -----------------------------------
+	------------------------   Provisioning docker on aws -----------------------------------
+	-----------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------
+#########################################################################################################
+
+
+
+====================================================================================
+Pre-requisite to Install the Docker-machine & setup SSH using ssh-keygen 
+====================================================================================
+
+--------------------------------------------
+My local VM running on Centos version 
+--------------------------------------------
+[root@docker ~]#cat /etc/centos-release
+CentOS Linux release 7.4.1708 (Core) 
+
+
+--------------------------------------------------------------------------------
+Step 1 To download docker-machine package for Linux centos machines
+--------------------------------------------------------------------------------
+$base=https://github.com/docker/machine/releases/download/v0.16.0 &&
+  curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
+  sudo install /tmp/docker-machine /usr/local/bin/docker-machine
+
+
+----------------------------------------------------------------------------------
+Step 2 To copy the *.bash file into /etc/bash_completion.d folder
+----------------------------------------------------------------------------------
+$base=https://raw.githubusercontent.com/docker/machine/v0.16.0
+for i in docker-machine-prompt.bash docker-machine-wrapper.bash docker-machine.bash
+do
+  sudo wget "$base/contrib/completion/bash/${i}" -P /etc/bash_completion.d
+done
+
+-------------------------------------------------------------------------------------------
+Step 3 To Complie the docker-machine-prompt.bash to refelect & set Envirnoment env
+-------------------------------------------------------------------------------------------
+$source /etc/bash_completion.d/docker-machine-prompt.bash
+
+
+
+========================================================================================================
+Step-up your aws access-key & secret_access_key on my oracle-local-vm machine /root/.aws/credentials
+========================================================================================================
+
+[root@docker .aws]#pwd
+/root/.aws
+
+[root@docker .aws]#ls -lrht
+total 4.0K
+-rw-r--r--. 1 root root 116 Nov 29 22:03 credentials
+
+[root@docker .aws]#cat credentials 
+[default]
+aws_access_key_id = 
+aws_secret_access_key = 
+
+
+==============================================================================================================================================
+Generate the Public & Private key on my oracle Local-vm machine centos (docker-machine) to talk all provisioning public cloud like aws 
+==============================================================================================================================================
+$ssh-keygen -t rsa 
+
+Press Enter 
+
+
+root@docker ~]#ssh-keygen -t rsa
+Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /root/.ssh/id_rsa.
+Your public key has been saved in /root/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:Hpltg4lO4py7FQ7IuJY631yqPGsel8MSRcudJvVpJ38 root@docker.hub.test
+The key's randomart image is:
++---[RSA 2048]----+
+|    . .          |
+|   o + o .       |
+|    = + = .      |
+| o o o o X       |
+|. + o + S = E    |
+| ..= O o o o     |
+|.oo O = .        |
+|+.o* *           |
+|.=*+*.           |
++----[SHA256]-----+
+
+
+
+========================================================================================================================================================================
+Provisioning on aws ec2 instances from docker-machine (my local oracl VM machine to public-cloud ec2 instance) Steps 
+========================================================================================================================================================================
+
+Centos -- > Image
+docker-machine create --driver amazonec2 --amazonec2-ami "ami-011b3ccf1bd6db744"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro"  --amazonec2-vpc-id vpc-e23fe498 --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,docker-machine" --amazonec2-ssh-user ec2-user ec22
+
+
+Ubuntu --- < Image 
+ami-0ac019f4fcb7cb7e6
+docker-machine create --driver amazonec2 --amazonec2-ami "ami-0ac019f4fcb7cb7e6"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro"  --amazonec2-vpc-id vpc-e23fe498 --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,docker-machine" --amazonec2-ssh-user ubuntu instance-image1
+
+
+-----------------------------------------------------------------------------------------------------------------------
+   Provisioning the EC2 instances (Ubuntu image --> ami-0ac019f4fcb7cb7e6) from my local VM - Docker-machine 
+-----------------------------------------------------------------------------------------------------------------------
+$docker-machine create --driver amazonec2 --amazonec2-ami "ami-0ac019f4fcb7cb7e6"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro"  --amazonec2-vpc-id vpc-e23fe498 --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,provision-docker" --amazonec2-ssh-user ubuntu instance-image1
+
+
+[root@docker ~]#docker-machine create --driver amazonec2 --amazonec2-ami "ami-0ac019f4fcb7cb7e6"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro"  --amazonec2-vpc-id vpc-e23fe498 --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,docker-machine" --amazonec2-ssh-user ubuntu instance-image1
+Running pre-create checks...
+Creating machine...
+(instance-image1) Launching instance...
+Waiting for machine to be running, this may take a few minutes...
+Detecting operating system of created instance...
+Waiting for SSH to be available...
+Detecting the provisioner...
+Provisioning with ubuntu(systemd)...
+Installing Docker...
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+Checking connection to Docker...
+Docker is up and running!
+To see how to connect your Docker Client to the Docker Engine running on this virtual machine, run: docker-machine env instance-image1
+
+
+----------------------------------------------
+List the Docker installed on EC2 :- 
+----------------------------------------------
+$docker-machine ls
+
+[root@docker ~]#docker-machine ls
+NAME              ACTIVE   DRIVER      STATE     URL                         SWARM   DOCKER     ERRORS
+instance-image1   -        amazonec2   Running   tcp://35.171.154.177:2376           v18.09.0   
+
+
+
+Note :- 
+
+1) IF you stop & restart you're aws instances. Provisioning aws instance public ip address will change stop/start. So you will see the below execption.
+
+To fix it regenerate-certs
+$docker-machine regenerate-certs instance-image1
+
+
+[root@docker ~]#docker-machine ls
+NAME              ACTIVE   DRIVER      STATE     URL                        SWARM   DOCKER    ERRORS
+instance-image1   -        amazonec2   Running   tcp://18.212.33.116:2376           Unknown   Unable to query docker version: Get https://18.212.33.116:2376/v1.15/version: x509: certificate is valid for 54.82.247.211, not 18.212.33.116
+
+
+[root@docker ~]#docker-machine regenerate-certs instance-image1 
+Regenerate TLS machine certs?  Warning: this is irreversible. (y/n): y
+Regenerating TLS certificates
+Waiting for SSH to be available...
+Detecting the provisioner...
+Installing Docker...
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+
+
+[root@docker ~]#docker-machine ls
+NAME              ACTIVE   DRIVER      STATE     URL                        SWARM   DOCKER     ERRORS
+instance-image1   -        amazonec2   Running   tcp://18.212.33.116:2376           v18.09.0   
+
+
+
+
+
+-------------------------------------------------------------
+Env details about docker-machine 
+-------------------------------------------------------------
+$docker-machine env instance-image1 
+
+[root@docker ~]#docker-machine env instance-image1 
+export DOCKER_TLS_VERIFY="1"
+export DOCKER_HOST="tcp://35.171.154.177:2376"
+export DOCKER_CERT_PATH="/root/.docker/machine/machines/instance-image1"
+export DOCKER_MACHINE_NAME="instance-image1"
+# Run this command to configure your shell: 
+# eval $(docker-machine env instance-image1)
+
+
+
+
+--------------------------------------------------------------
+Docker-image Inspect the created aws-ec2 instance created
+--------------------------------------------------------------
+$docker-machine inspect instance-image1
+
+[root@docker ~]#docker-machine inspect instance-image1
+{
+    "ConfigVersion": 3,
+    "Driver": {
+        "IPAddress": "",
+        "MachineName": "instance-image1",
+        "SSHUser": "ubuntu",
+        "SSHPort": 22,
+        "SSHKeyPath": "/root/.docker/machine/machines/instance-image1/id_rsa",
+        "StorePath": "/root/.docker/machine",
+        "SwarmMaster": false,
+        "SwarmHost": "tcp://0.0.0.0:3376",
+        "SwarmDiscovery": "",
+        "Id": "",
+        "AccessKey": "",
+        "SecretKey": "",
+        "SessionToken": "",
+        "Region": "us-east-1",
+        "AMI": "ami-0ac019f4fcb7cb7e6",
+        "SSHKeyID": 0,
+        "ExistingKey": false,
+        "KeyName": "instance-image1",
+        "InstanceId": "",
+        "InstanceType": "t2.micro",
+        "PrivateIPAddress": "",
+        "SecurityGroupId": "",
+        "SecurityGroupIds": [
+            ""
+        ],
+        "SecurityGroupName": "",
+        "SecurityGroupNames": [
+            "docker-machine"
+        ],
+        "SecurityGroupReadOnly": false,
+        "OpenPorts": null,
+        "Tags": "Name,docker-machine",
+        "ReservationId": "",
+        "DeviceName": "/dev/sda1",
+        "RootSize": 16,
+        "VolumeType": "gp2",
+        "IamInstanceProfile": "",
+        "VpcId": "",
+        "SubnetId": "",
+        "Zone": "a",
+        "RequestSpotInstance": false,
+        "SpotPrice": "0.50",
+        "BlockDurationMinutes": 0,
+        "PrivateIPOnly": false,
+        "UsePrivateIP": false,
+        "UseEbsOptimizedInstance": false,
+        "Monitoring": false,
+        "SSHPrivateKeyPath": "/root/.ssh/id_rsa",
+        "RetryCount": 5,
+        "Endpoint": "",
+        "DisableSSL": false,
+        "UserDataFile": ""
+    },
+    "DriverName": "amazonec2",
+    "HostOptions": {
+        "Driver": "",
+        "Memory": 0,
+        "Disk": 0,
+        "EngineOptions": {
+            "ArbitraryFlags": [],
+            "Dns": null,
+            "GraphDir": "",
+            "Env": [],
+            "Ipv6": false,
+            "InsecureRegistry": [],
+            "Labels": [],
+            "LogLevel": "",
+            "StorageDriver": "",
+            "SelinuxEnabled": false,
+            "TlsVerify": true,
+            "RegistryMirror": [],
+            "InstallURL": "https://get.docker.com"
+        },
+        "SwarmOptions": {
+            "IsSwarm": false,
+            "Address": "",
+            "Discovery": "",
+            "Agent": false,
+            "Master": false,
+            "Host": "tcp://0.0.0.0:3376",
+            "Image": "swarm:latest",
+            "Strategy": "spread",
+            "Heartbeat": 0,
+            "Overcommit": 0,
+            "ArbitraryFlags": [],
+            "ArbitraryJoinFlags": [],
+            "Env": null,
+            "IsExperimental": false
+        },
+        "AuthOptions": {
+            "CertDir": "/root/.docker/machine/certs",
+            "CaCertPath": "/root/.docker/machine/certs/ca.pem",
+            "CaPrivateKeyPath": "/root/.docker/machine/certs/ca-key.pem",
+            "CaCertRemotePath": "",
+            "ServerCertPath": "/root/.docker/machine/machines/instance-image1/server.pem",
+            "ServerKeyPath": "/root/.docker/machine/machines/instance-image1/server-key.pem",
+            "ClientKeyPath": "/root/.docker/machine/certs/key.pem",
+            "ServerCertRemotePath": "",
+            "ServerKeyRemotePath": "",
+            "ClientCertPath": "/root/.docker/machine/certs/cert.pem",
+            "ServerCertSANs": [],
+            "StorePath": "/root/.docker/machine/machines/instance-image1"
+        }
+    },
+    "Name": "instance-image1"
+}
+
+
+
+-----------------------------------------------------------
+SSH aws ec2 created instances from docker-machine 
+-----------------------------------------------------------
+$docker-machine ssh instance-image1 
+
+
+[root@docker ~]#docker-machine ssh instance-image1 
+Welcome to Ubuntu 18.04.1 LTS (GNU/Linux 4.15.0-1021-aws x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Sat Dec  1 06:33:21 UTC 2018
+
+  System load:  0.0               Processes:              87
+  Usage of /:   9.7% of 15.45GB   Users logged in:        0
+  Memory usage: 22%               IP address for eth0:    172.31.95.63
+  Swap usage:   0%                IP address for docker0: 172.17.0.1
+
+
+  Get cloud support with Ubuntu Advantage Cloud Guest:
+    http://www.ubuntu.com/business/services/cloud
+
+ * Canonical Livepatch is available for installation.
+   - Reduce system reboots and improve kernel security. Activate at:
+     https://ubuntu.com/livepatch
+
+108 packages can be updated.
+40 updates are security updates.
+
+
+Last login: Sat Dec  1 06:28:19 2018 from 49.206.13.24
+ubuntu@instance-image1:~$ 
+
+
+
+-------------------------------
+Docker-machine status 
+-------------------------------
+$docker-machine status instance-image1 
+
+[root@docker ~]#docker-machine status instance-image1 
+Running
+	
+
+--------------------------------------------------------------
+Docker-machine Stop
+--------------------------------------------------------------
+$docker-machine Stop instance-image1 
+
+[root@docker ~]#docker-machine stop instance-image1 
+Stopping "instance-image1"...
+Machine "instance-image1" was stopped.
+
+[root@docker ~]#docker-machine status instance-image1
+Stopped
+
+[root@docker ~]#docker-machine ls
+NAME              ACTIVE   DRIVER      STATE     URL   SWARM   DOCKER    ERRORS
+instance-image1   -        amazonec2   Stopped                 Unknown   
+
+
+--------------------------------------------------------------
+Docker-machine Start
+--------------------------------------------------------------
+$docker-machine start instance-image1 
+
+[root@docker ~]#docker-machine start instance-image1 
+Starting "instance-image1"...
+Machine "instance-image1" was started.
+Waiting for SSH to be available...
+Detecting the provisioner...
+Started machines may have new IP addresses. You may need to re-run the `docker-machine env` command.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+After Start provisioned docker instances Unable to list the provisioned ec2 instances as Public-IP address as changed, to fix it please follow the below steps.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+[root@docker ~]#docker-machine ls
+NAME              ACTIVE   DRIVER      STATE     URL                        SWARM   DOCKER    ERRORS
+instance-image1   -        amazonec2   Running   tcp://18.212.33.116:2376           Unknown   Unable to query docker version: Get https://18.212.33.116:2376/v1.15/version: x509: certificate is valid for 54.82.247.211, not 18.212.33.116
+
+
+[root@docker ~]#docker-machine regenerate-certs instance-image1 
+Regenerate TLS machine certs?  Warning: this is irreversible. (y/n): y
+Regenerating TLS certificates
+Waiting for SSH to be available...
+Detecting the provisioner...
+Installing Docker...
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+
+
+[root@docker ~]#docker-machine ls
+NAME              ACTIVE   DRIVER      STATE     URL                        SWARM   DOCKER     ERRORS
+instance-image1   -        amazonec2   Running   tcp://18.212.33.116:2376           v18.09.0   
+
+
+
+
+
+[root@docker ~]#docker-machine ls
+NAME              ACTIVE   DRIVER      STATE     URL                        SWARM   DOCKER     ERRORS
+instance-image1   -        amazonec2   Running   tcp://18.212.33.116:2376           v18.09.0   
+
+
+
+
+-------------------------------------------------------------------------------------------------
+Remove the provisioned EC2 instances from my docker-machine
+-------------------------------------------------------------------------------------------------
+$docker-machine ls 
+
+[root@docker ~]#docker-machine ls 
+NAME              ACTIVE   DRIVER      STATE     URL                         SWARM   DOCKER     ERRORS
+instance-image1   -        amazonec2   Running   tcp://35.171.154.177:2376           v18.09.0   
+
+
+$docker-machine rm instance-image1
+
+[root@docker ~]#docker-machine rm instance-image1 
+About to remove instance-image1
+WARNING: This action will delete both local reference and remote instance.
+Are you sure? (y/n): y
+Successfully removed instance-image1
+
+
+
+
+
