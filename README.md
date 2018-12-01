@@ -1,6 +1,6 @@
 # docker
 
-# Docker-machine to provisioning on aws ec2 instances & try to avoid the confusion. 
+# Docker-machine to provisioning aws ec2 instances & try to avoid the confusion. 
 My local-VM running centos & installed docker-machine steps
 
 1) Steps to setup docker-machine on my local vm 
