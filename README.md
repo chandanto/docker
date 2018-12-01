@@ -19,3 +19,6 @@ My local-VM running centos & installed docker-machine steps
 10) docker-machine regenerate-certs
 11) docker-machine start
 12) docker-machine rm
+
+
+# For more information please check 'docker-machine_provisioning_aws.txt'
