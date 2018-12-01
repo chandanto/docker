@@ -10,7 +10,7 @@
 
 
 
-====================================================================================
+===================================================================================
 Pre-requisite to Install the Docker-machine & setup SSH using ssh-keygen 
 ====================================================================================
 
@@ -62,9 +62,10 @@ aws_access_key_id =
 aws_secret_access_key = 
 
 
-==============================================================================================================================================
+========================================================================================================================================
 Generate the Public & Private key on my oracle Local-vm machine centos (docker-machine) to talk all provisioning public cloud like aws 
-==============================================================================================================================================
+========================================================================================================================================
+
 $ssh-keygen -t rsa 
 
 Press Enter 
@@ -94,9 +95,9 @@ The key's randomart image is:
 
 
 
-========================================================================================================================================================================
+========================================================================================================================================
 Provisioning on aws ec2 instances from docker-machine (my local oracl VM machine to public-cloud ec2 instance) Steps 
-========================================================================================================================================================================
+========================================================================================================================================
 
 Centos -- > Image
 docker-machine create --driver amazonec2 --amazonec2-ami "ami-011b3ccf1bd6db744"  --amazonec2-region "us-east-1" --amazonec2-instance-type "t2.micro"  --amazonec2-vpc-id vpc-e23fe498 --amazonec2-ssh-keypath "/root/.ssh/id_rsa" --amazonec2-tags "Name,docker-machine" --amazonec2-ssh-user ec2-user ec22
@@ -383,9 +384,9 @@ Waiting for SSH to be available...
 Detecting the provisioner...
 Started machines may have new IP addresses. You may need to re-run the `docker-machine env` command.
 
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------
 After Start provisioned docker instances Unable to list the provisioned ec2 instances as Public-IP address as changed, to fix it please follow the below steps.
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------
 
 [root@docker ~]#docker-machine ls
 NAME              ACTIVE   DRIVER      STATE     URL                        SWARM   DOCKER    ERRORS
@@ -409,13 +410,9 @@ instance-image1   -        amazonec2   Running   tcp://18.212.33.116:2376       
 
 
 
-
-
 [root@docker ~]#docker-machine ls
 NAME              ACTIVE   DRIVER      STATE     URL                        SWARM   DOCKER     ERRORS
 instance-image1   -        amazonec2   Running   tcp://18.212.33.116:2376           v18.09.0   
-
-
 
 
 -------------------------------------------------------------------------------------------------
@@ -435,8 +432,3 @@ About to remove instance-image1
 WARNING: This action will delete both local reference and remote instance.
 Are you sure? (y/n): y
 Successfully removed instance-image1
-
-
-
-
-
